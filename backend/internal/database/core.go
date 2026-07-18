@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+
+	_ "modernc.org/sqlite"
 )
 
 var dbname string = "app.db"
@@ -12,7 +14,10 @@ var db *sql.DB
 
 func Connect() *sql.DB {
 	fmt.Println("connecting to database")
-	db, err := sql.Open("sqlite", dbname)
+
+	var err error
+
+	db, err = sql.Open("sqlite", dbname)
 	if err != nil {
 		log.Fatal(err)
 	}

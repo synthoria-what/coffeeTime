@@ -8,6 +8,13 @@ type User struct {
 	AvatarPath   string `json:"avatar_path"`
 }
 
+type GetUserResponse struct {
+	ID         int    `json:"id"`
+	Username   string `json:"username"`
+	Role       string `json:"role"`
+	AvatarPath string `json:"avatar_path"`
+}
+
 type CreateUserRequest struct {
 	Username   string `json:"username"`
 	Role       string `json:"role"`
