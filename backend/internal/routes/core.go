@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"synthori.space/coffeeTime/internal/messages"
 	"synthori.space/coffeeTime/internal/middleware"
 	"synthori.space/coffeeTime/internal/services"
 	"synthori.space/coffeeTime/mock"
@@ -17,24 +16,13 @@ func InitRoutes() *chi.Mux {
 	r.Post("/generate_users", GenerateMockUsers)
 	r.Post("/generate_database", GenerateMockDatabase)
 
+	r.Post("/register", Register)
+	r.Post("/login", Login)
+
 	r.Route("/me", func(r chi.Router) {
 		r.Use(middleware.AuthMiddleware)
 
-		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-			userID, ok := r.Context().Value(middleware.UserIDKey).(int)
-			if !ok {
-				services.WriteError(w, http.StatusUnauthorized, messages.ErrInvalidToken.Error())
-				return
-			}
-
-			user, err := services.GetUser(userID)
-			if err != nil {
-				services.WriteError(w, http.StatusBadRequest, "user not found")
-				return
-			}
-
-			services.WriteJSON(w, http.StatusOK, user)
-		})
+		r.Get("/", GetMyProfile)
 	})
 
 	r.Route("/users", func(r chi.Router) {

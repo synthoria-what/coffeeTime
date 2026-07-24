@@ -1,11 +1,16 @@
 package routes
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"synthori.space/coffeeTime/internal/database"
+	"synthori.space/coffeeTime/internal/messages"
+	"synthori.space/coffeeTime/internal/middleware"
+	"synthori.space/coffeeTime/internal/models"
 	"synthori.space/coffeeTime/internal/services"
 )
 
@@ -41,8 +46,65 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 	services.WriteJSON(w, http.StatusOK, user)
 }
 
-func GetMyProfile(w http.ResponseWriter, r *http.Request) {
+func Login(w http.ResponseWriter, r *http.Request) {
+	var req models.LoginRequest
 
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		services.WriteError(w, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	token, err := services.Login(req)
+	if err != nil {
+		services.WriteError(w, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	response := models.TokenResponse{
+		Token: token,
+	}
+
+	services.WriteJSON(w, http.StatusOK, response)
+}
+
+func Register(w http.ResponseWriter, r *http.Request) {
+	var req models.RegisterRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		services.WriteError(w, http.StatusBadRequest, err.Error())
+	}
+
+	_, err := services.Registeruser(req)
+	if err != nil {
+		services.WriteError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	now := time.Now().UTC()
+
+	resp := messages.RegisterResponse{
+		Message:   http.StatusText(http.StatusOK),
+		Status:    http.StatusOK,
+		TimeStamp: now,
+	}
+
+	services.WriteJSON(w, http.StatusOK, resp)
+}
+
+func GetMyProfile(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(middleware.UserIDKey).(int)
+	if !ok {
+		services.WriteError(w, http.StatusUnauthorized, messages.ErrInvalidToken.Error())
+		return
+	}
+
+	user, err := services.GetUser(userID)
+	if err != nil {
+		services.WriteError(w, http.StatusBadRequest, "user not found")
+		return
+	}
+
+	services.WriteJSON(w, http.StatusOK, user)
 }
 
 func GenerateMockUsers(w http.ResponseWriter, r *http.Request) {

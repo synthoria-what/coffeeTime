@@ -11,7 +11,7 @@ import (
 	"synthori.space/coffeeTime/internal/models"
 )
 
-const jwtSecret = "super-secret-key-123123123"
+var jwtSecret = []byte("super-secret-key-123123123")
 
 func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -20,6 +20,10 @@ func HashPassword(password string) (string, error) {
 	}
 
 	return string(bytes), nil
+}
+
+func CheckPassword(hashPassword []byte, password []byte) error {
+	return bcrypt.CompareHashAndPassword(hashPassword, password)
 }
 
 func GetTokenFromHeader(r *http.Request) (string, error) {
@@ -65,12 +69,12 @@ func ParseToken(tokenString string) (*models.TokenClaims, error) {
 	return claims, nil
 }
 
-func GenerateToken(userID int, role string) (string, error) {
+func GenerateToken(data models.UserAuthData) (string, error) {
 	now := time.Now()
 
 	claims := models.TokenClaims{
-		UserID: userID,
-		Role:   role,
+		UserID: data.ID,
+		Role:   data.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			IssuedAt: jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(
@@ -84,10 +88,5 @@ func GenerateToken(userID int, role string) (string, error) {
 		claims,
 	)
 
-	tokenString, err := token.SignedString(jwtSecret)
-	if err != nil {
-		return "", err
-	}
-
-	return tokenString, nil
+	return token.SignedString(jwtSecret)
 }

@@ -33,7 +33,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		ctx := context.WithValue(
 			r.Context(),
 			UserIDKey,
-			claims.ID,
+			claims.UserID,
 		)
 
 		ctx = context.WithValue(
