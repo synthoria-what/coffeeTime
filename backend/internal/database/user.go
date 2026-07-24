@@ -68,6 +68,39 @@ func GetUserByID(userID int) (models.GetUserResponse, error) {
 
 }
 
+func GetUserByUsername(username string) (models.GetUserResponse, error) {
+	var user models.GetUserResponse
+
+	err := db.QueryRow("select id, username, role, avatar_path from users where username=?", username).Scan(
+		&user.ID,
+		&user.Username,
+		&user.Role,
+		&user.AvatarPath,
+	)
+
+	if err != nil {
+		return models.GetUserResponse{}, messages.ErrUserNotFound
+	}
+
+	return user, nil
+
+}
+
+func GetUserAuthData(username string) (models.UserAuthData, error) {
+	var data models.UserAuthData
+
+	err := db.QueryRow("select id, password, role from users where username=?", username).Scan(
+		&data.ID,
+		&data.PasswordHash,
+		&data.Role,
+	)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
+}
+
 func GetFullUserProfile(userID int) (models.User, error) {
 	var user models.User
 
@@ -107,6 +140,8 @@ func GetUsers(limit int, offset int) ([]models.GetUserResponse, error) {
 		return nil, err
 	}
 
+	defer rows.Close()
+
 	for rows.Next() {
 		var user models.GetUserResponse
 		err := rows.Scan(
@@ -123,7 +158,6 @@ func GetUsers(limit int, offset int) ([]models.GetUserResponse, error) {
 		if err := rows.Err(); err != nil {
 			return nil, err
 		}
-		defer rows.Close()
 
 		users = append(users, user)
 	}

@@ -16,6 +16,9 @@ func InitRoutes() *chi.Mux {
 	r.Post("/generate_users", GenerateMockUsers)
 	r.Post("/generate_database", GenerateMockDatabase)
 
+	r.Post("/register", Register)
+	r.Post("/login", Login)
+
 	r.Route("/me", func(r chi.Router) {
 		r.Use(middleware.AuthMiddleware)
 

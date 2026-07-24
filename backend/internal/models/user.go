@@ -4,7 +4,7 @@ type User struct {
 	ID           int    `json:"id"`
 	Username     string `json:"username"`
 	Role         string `json:"role"`
-	PasswordHash string `json:"password_hash"`
+	PasswordHash string `json:"-"`
 	AvatarPath   string `json:"avatar_path"`
 }
 
@@ -13,6 +13,12 @@ type GetUserResponse struct {
 	Username   string `json:"username"`
 	Role       string `json:"role"`
 	AvatarPath string `json:"avatar_path"`
+}
+
+type UserAuthData struct {
+	ID           int
+	PasswordHash string
+	Role         string
 }
 
 type CreateUserRequest struct {
@@ -28,7 +34,12 @@ type UpdateUserRequest struct {
 	AvatarPath *string `json:"avatar_path"`
 }
 
-type LoginUserRequest struct {
+type LoginRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type RegisterRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }

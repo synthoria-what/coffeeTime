@@ -8,3 +8,7 @@ type TokenClaims struct {
 
 	jwt.RegisteredClaims
 }
+
+type TokenResponse struct {
+	Token string `json:"token"`
+}
