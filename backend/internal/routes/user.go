@@ -97,13 +97,11 @@ func GetMyProfile(w http.ResponseWriter, r *http.Request) {
 		services.WriteError(w, http.StatusUnauthorized, messages.ErrInvalidToken.Error())
 		return
 	}
-
 	user, err := services.GetUser(userID)
 	if err != nil {
 		services.WriteError(w, http.StatusBadRequest, "user not found")
 		return
 	}
-
 	services.WriteJSON(w, http.StatusOK, user)
 }
 
